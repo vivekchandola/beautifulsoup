@@ -25,6 +25,7 @@ STRICT = 'strict'
 XML = 'xml'
 HTML = 'html'
 HTML_5 = 'html5'
+XSD = 'xsd'
 
 
 class TreeBuilderRegistry(object):
@@ -58,7 +59,7 @@ class TreeBuilderRegistry(object):
         while len(features) > 0:
             feature = features.pop()
             we_have_the_feature = self.builders_for_feature.get(feature, [])
-            print(self.builders_for_feature)
+            #print(self.builders_for_feature)
             if len(we_have_the_feature) > 0:
                 if candidates is None:
                     candidates = we_have_the_feature
@@ -328,9 +329,3 @@ except ImportError:
     # They don't have lxml installed.
     pass
 
-try:
-    from . import _xsd
-    register_treebuilders_from(_xsd)
-except ImportError:
-    # They don't have lxml installed.
-    pass

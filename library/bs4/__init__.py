@@ -166,10 +166,18 @@ class BeautifulSoup(Tag):
             builder = builder_class()
             if not (original_features == builder.NAME or
                     original_features in builder.ALTERNATE_NAMES):
+                
+                if ("xsd" in builder.NAME or 
+                    "xsd" in builder.ALTERNATE_NAMES):
+                    pass
+                    #raise ParserRejectedMarkup("Only xsd files are aceepted")
+                
                 if builder.is_xml:
                     markup_type = "XML"
                 else:
                     markup_type = "HTML"
+                
+                builder.ALTERNATE_NAMES
 
                 caller = traceback.extract_stack()[0]
                 filename = caller[0]
