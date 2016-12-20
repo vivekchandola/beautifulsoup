@@ -15,13 +15,20 @@ class XSDParsing(unittest.TestCase):
     '''
      
     def setUp(self):
-        self.xsdfile = open("xsd.txt")
-        self.soup = BeautifulSoup(self.xsdfile,"xsd")
+        self.soup = BeautifulSoup(self.getdocument(),"xsd")
 
     def test_select(self):
         selectsoup = self.soup.select("complexType");
         for select in selectsoup:
-            print(select.contents[1])
+            #print(select.contents[1])
+            print("content")
+    def test_complextype(self):
+        print("complextype")
+        print(self.soup.parse_xsd("complexType", etree,self.getdocument()))
+    def test_simpletype(self):
+        print("simpletype")
+    def getdocument(self):
+        return open("xsd.txt")
 
 if __name__ == '__main__':
     unittest.main()
