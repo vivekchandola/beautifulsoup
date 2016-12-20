@@ -1427,7 +1427,7 @@ class Tag(PageElement):
             schema[c_type].append(get_elements(child))
         return schema
     
-    def parse_xsd(self, selector, etreeobject=None, doc=None):
+    def parse_xsd(self, etreeobject=None, doc=None):
         # Perform a xsd operation on the current element
         if etreeobject is None:
             raise ValueError("Pass a etree object in the method argument")

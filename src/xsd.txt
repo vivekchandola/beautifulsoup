@@ -6,7 +6,7 @@
         <xs:element minOccurs="1" maxOccurs="1" name="source">
           <xs:complexType>
             <xs:all>
-              <xs:element name="name" type="xs:string" />
+              <xs:element name="name" type="xs:integer" />
               <xs:element name="group_id" type="xs:integer" />
               <xs:element minOccurs="0" name="description" type="xs:string" />
             </xs:all>
@@ -17,8 +17,8 @@
           <xs:complexType>
             <xs:all>
               <xs:element name="date" type="xs:date" />
-              <xs:element minOccurs="0" name="event_type" type="xs:string" />
-              <xs:element minOccurs="0" name="event_hours" type="xs:string" />
+              <xs:element minOccurs="0" name="event_type" type="xs:date" />
+              <xs:element minOccurs="0" name="event_hours" type="xs:date" />
             </xs:all>
             <xs:attribute name="id" type="xs:integer" use="required" />
           </xs:complexType>
@@ -99,7 +99,7 @@
         <xs:element minOccurs="0" name="line3" type="xs:string"/>
         <xs:element name="city" type="xs:string"/>
         <xs:element name="state" type="xs:string"/>
-        <xs:element name="zip" type="xs:string"/>
+        <xs:element name="zip" type="xs:integer"/>
     </xs:all> 
 </xs:complexType> 
 
@@ -110,6 +110,34 @@
     </xs:extension>
   </xs:simpleContent>
 </xs:complexType>
+
+<xs:complexType name="testing">
+  <xs:simpleContent>
+    <xs:extension base="xs:integer">
+      <xs:attribute name="testing" type="testingEnum" />
+    </xs:extension>
+  </xs:simpleContent>
+</xs:complexType>
+
+<xs:complexType name="parsing">
+  <xs:simpleContent>
+    <xs:extension base="xs:integer">
+      <xs:attribute name="parsing" type="parsingEnum" />
+    </xs:extension>
+  </xs:simpleContent>
+</xs:complexType>
+
+<xs:complexType name="simplePhoneType">
+    <xs:all>
+        <xs:element minOccurs="0" name="country_name" type="xs:string"/> 
+        <xs:element name="line1" type="xs:string"/>
+        <xs:element minOccurs="0" name="line2" type="xs:string"/>
+        <xs:element minOccurs="0" name="line3" type="xs:string"/>
+        <xs:element name="city" type="xs:string"/>
+        <xs:element name="state" type="xs:string"/>
+        <xs:element name="zip" type="xs:string"/>
+    </xs:all> 
+</xs:complexType> 
 
   <xs:simpleType name="certificationEnum">
     <xs:restriction base="xs:string">
@@ -127,11 +155,27 @@
   <xs:simpleType name="yesNoEnum">
     <xs:restriction base="xs:string">
       <xs:enumeration value="yes"/>
+      <xs:enumeration value="YES"/>
+      <xs:enumeration value="NO"/>
+    </xs:restriction>
+  </xs:simpleType> 
+  
+  <xs:simpleType name="testForEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="yes"/>
       <xs:enumeration value="no"/>
       <xs:enumeration value="Yes"/>
       <xs:enumeration value="No"/>
       <xs:enumeration value="YES"/>
       <xs:enumeration value="NO"/>
+    </xs:restriction>
+  </xs:simpleType> 
+  
+  <xs:simpleType name="phoneNumber">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="yes"/>
+      <xs:enumeration value="no"/>
+      <xs:enumeration value="Yes"/>
     </xs:restriction>
   </xs:simpleType> 
 
