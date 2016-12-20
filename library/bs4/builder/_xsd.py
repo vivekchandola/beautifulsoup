@@ -30,7 +30,7 @@ class LXMLTreeBuilderForXSD(TreeBuilder):
     DEFAULT_PARSER_CLASS = etree.XMLParser
 
     is_xsd = True
-    is_xml = True
+
     
     NAME = "lxml-xsd"
     ALTERNATE_NAMES = ["xsd"]
@@ -41,6 +41,8 @@ class LXMLTreeBuilderForXSD(TreeBuilder):
 
     # This namespace mapping is specified in the XSD Namespace
     DEFAULT_NSMAPS = {'http://www.w3.org/2001/XMLSchema' : "xs"}
+    
+    is_xml = True
 
     def default_parser(self, encoding):
         # This can either return a parser object or a class, which

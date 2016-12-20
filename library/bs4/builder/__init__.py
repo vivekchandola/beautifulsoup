@@ -335,6 +335,6 @@ try:
     from . import _xsd
     register_treebuilders_from(_xsd)
 except ImportError:
-    # They don't have lxml installed.
+    # No lxml installed.
     pass
 

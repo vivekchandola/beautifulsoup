@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="3.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="main_object">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element minOccurs="1" maxOccurs="1" name="source">
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="name" type="xs:string" />
+              <xs:element name="group_id" type="xs:integer" />
+              <xs:element minOccurs="0" name="description" type="xs:string" />
+            </xs:all>
+            <xs:attribute name="id" type="xs:integer" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="1" maxOccurs="1" name="event">
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="date" type="xs:date" />
+              <xs:element minOccurs="0" name="event_type" type="xs:string" />
+              <xs:element minOccurs="0" name="event_hours" type="xs:string" />
+            </xs:all>
+            <xs:attribute name="id" type="xs:integer" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="state">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="name" type="xs:string" />
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:integer" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="location">
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="address" type="simpleAddressType" />
+              <xs:element minOccurs="0" name="directions" type="xs:string" />
+              <xs:element minOccurs="0" name="hours" type="xs:string" />
+            </xs:all>
+            <xs:attribute name="id" type="xs:integer" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="selection_item">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="selection_type_id" type="xs:integer" />
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="option_id">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:integer">
+                      <xs:attribute name="sort_order" type="xs:integer" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:integer" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="custom_selection">
+          <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+              <xs:element name="heading" type="xs:string" />
+              <xs:sequence maxOccurs="unbounded">
+                <xs:element name="response_id">
+                  <xs:complexType>
+                    <xs:simpleContent>
+                      <xs:extension base="xs:integer">
+                        <xs:attribute name="sort_order" type="xs:integer" />
+                      </xs:extension>
+                    </xs:simpleContent>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:choice>
+            <xs:attribute name="id" type="xs:integer" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="response">
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="text" type="xs:string" />
+              <xs:element minOccurs="0" name="sort_order" type="xs:integer" />
+            </xs:all>
+            <xs:attribute name="id" type="xs:integer" use="required" />
+          </xs:complexType>
+        </xs:element>
+       </xs:choice>
+      <xs:attribute fixed="3.0" name="schemaVersion" type="xs:decimal" use="required" />
+    </xs:complexType>
+  </xs:element>
+
+<xs:complexType name="simpleAddressType">
+    <xs:all>
+        <xs:element minOccurs="0" name="location_name" type="xs:string"/> 
+        <xs:element name="line1" type="xs:string"/>
+        <xs:element minOccurs="0" name="line2" type="xs:string"/>
+        <xs:element minOccurs="0" name="line3" type="xs:string"/>
+        <xs:element name="city" type="xs:string"/>
+        <xs:element name="state" type="xs:string"/>
+        <xs:element name="zip" type="xs:string"/>
+    </xs:all> 
+</xs:complexType> 
+
+<xs:complexType name="certified">
+  <xs:simpleContent>
+    <xs:extension base="xs:integer">
+      <xs:attribute name="certification" type="certificationEnum" />
+    </xs:extension>
+  </xs:simpleContent>
+</xs:complexType>
+
+  <xs:simpleType name="certificationEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="unofficial_partial"/>
+      <xs:enumeration value="unofficial_complete"/>
+      <xs:enumeration value="certified"/>
+      <xs:enumeration value="Unofficial_partial"/>
+      <xs:enumeration value="Unofficial_complete"/>
+      <xs:enumeration value="Unofficial_Partial"/>
+      <xs:enumeration value="Unofficial_Complete"/>
+      <xs:enumeration value="Certified"/>
+    </xs:restriction>
+  </xs:simpleType> 
+
+  <xs:simpleType name="yesNoEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="yes"/>
+      <xs:enumeration value="no"/>
+      <xs:enumeration value="Yes"/>
+      <xs:enumeration value="No"/>
+      <xs:enumeration value="YES"/>
+      <xs:enumeration value="NO"/>
+    </xs:restriction>
+  </xs:simpleType> 
+
+</xs:schema>

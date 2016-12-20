@@ -1429,19 +1429,10 @@ class Tag(PageElement):
     
     def parse_xsd(self, selector, etreeobject=None, doc=None):
         # Perform a xsd operation on the current element
-        if(etreeobject is None):
+        if etreeobject is None:
             raise ValueError("Pass a etree object in the method argument")
-        if(doc is not None):
+        if doc is not None:
             schema = self.create_schema(etreeobject.parse(doc))
-        else:
-            selector = selector.replace("xsd:","")
-            selector = selector.replace("xs:","")
-            selectValue = self.select(selector)
-            for value in selectValue:
-                print(value.contents[1])
-                print("####")
-                schema = ""
-                #print(schema)
         return schema
         
     def select_xsd(self, selector):
