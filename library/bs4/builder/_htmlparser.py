@@ -130,6 +130,7 @@ class BeautifulSoupHTMLParser(HTMLParser):
 class HTMLParserTreeBuilder(HTMLTreeBuilder):
 
     is_xml = False
+    is_xsd = False
     picklable = True
     NAME = HTMLPARSER
     features = [NAME, HTML, STRICT]

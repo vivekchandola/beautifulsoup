@@ -91,6 +91,7 @@ class TreeBuilder(object):
     features = []
 
     is_xml = False
+    is_xsd = False
     picklable = False
     preserve_whitespace_tags = set()
     empty_element_tags = None # A tag will be considered an empty-element
@@ -325,6 +326,14 @@ except ImportError:
 try:
     from . import _lxml
     register_treebuilders_from(_lxml)
+except ImportError:
+    # They don't have lxml installed.
+    pass
+
+#xsd parser register
+try:
+    from . import _xsd
+    register_treebuilders_from(_xsd)
 except ImportError:
     # They don't have lxml installed.
     pass

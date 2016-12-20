@@ -190,10 +190,34 @@ class PageElement(object):
             # used on HTML markup.
             return getattr(self, 'is_xml', False)
         return self.parent._is_xml
+    
+    @property
+    def _is_xsd(self):
+        """Is this element part of an XSD tree or an HTML tree?
+
+        This is used when mapping a formatter name ("minimal") to an
+        appropriate function (one that performs entity-substitution on
+        the contents of <script> and <style> tags, or not). It can be
+        inefficient, but it should be called very rarely.
+        """
+        if self.known_xsd is not None:
+            # Most of the time we will have determined this when the
+            # document is parsed.
+            return self.known_xsd
+
+        # Otherwise, it's likely that this element was created by
+        # direct invocation of the constructor from within the user's
+        # Python code.
+        if self.parent is None:
+            # This is the top-level object. It should have .known_xml set
+            # from tree creation. If not, take a guess--BS is usually
+            # used on HTML markup.
+            return getattr(self, 'is_xsd', False)
+        return self.parent._is_xsd
 
     def _formatter_for_name(self, name):
         "Look up a formatter function based on its name and the tree."
-        if self._is_xml:
+        if self._is_xml or self._is_xsd:
             return self.XML_FORMATTERS.get(
                 name, EntitySubstitution.substitute_xml)
         else:
@@ -798,6 +822,8 @@ class Doctype(PreformattedString):
     PREFIX = u'<!DOCTYPE '
     SUFFIX = u'>\n'
 
+INDICATORS = ["all", "sequence", "choice"]
+TYPES = ["simpleType", "complexType"]
 
 class Tag(PageElement):
 
@@ -1327,7 +1353,109 @@ class Tag(PageElement):
         if value:
             return value[0]
         return None
+    
+    def create_schema(self, schema_data):
+        def getXSVal(element): #removes namespace
+            return element.tag.split('}')[-1]
+        
+        def get_simple_type(element):
+            return {
+                "name": element.get("name"),
+                "restriction": element.getchildren()[0].attrib,
+                "elements": [ e.get("value") for e in element.getchildren()[0].getchildren() ]
+        }
 
+        def get_simple_content(element):
+            return {
+                "simpleContent": {
+                    "extension": element.getchildren()[0].attrib,
+                    "attributes": [ a.attrib for a in element.getchildren()[0].getchildren() ]
+                }
+            }
+        
+        def get_elements(element):
+            if len(element.getchildren()) == 0:
+                return element.attrib
+
+            data = {}
+
+            ename = element.get("name")
+            tag = getXSVal(element)
+
+            if ename is None:
+                if tag == "simpleContent":
+                    return get_simple_content(element)
+                elif tag in INDICATORS:
+                    data["indicator"] = tag
+                elif tag in TYPES:
+                    data["type"] = tag
+                else:
+                    data["option"] = tag
+
+            else:
+                if tag == "simpleType":
+                    return get_simple_type(element)
+                else: 
+                    data.update(element.attrib)
+
+            data["elements"] = []
+            data["attributes"] = []
+            children = element.getchildren()        
+
+            for child in children:
+                if child.get("name") is not None:
+                    data[getXSVal(child)+"s"].append(get_elements(child))
+                elif tag in INDICATORS and getXSVal(child) in INDICATORS:
+                    data["elements"].append(get_elements(child))
+                else:
+                    data.update(get_elements(child))
+
+            if len(data["elements"]) == 0:
+                del data["elements"]
+            if len(data["attributes"]) == 0:
+                del data["attributes"]
+
+            return data
+
+        schema = {}
+        root = schema_data.getroot()
+        children = root.getchildren()
+        for child in children:
+            c_type = getXSVal(child)
+            if child.get("name") is not None and not c_type in schema:
+                schema[c_type] = []
+            schema[c_type].append(get_elements(child))
+        return schema
+    
+    def parse_xsd(self, selector, etreeobject=None, doc=None):
+        # Perform a xsd operation on the current element
+        if(etreeobject is None):
+            raise ValueError("Pass a etree object in the method argument")
+        if(doc is not None):
+            schema = self.create_schema(etreeobject.parse(doc))
+        else:
+            selector = selector.replace("xsd:","")
+            selector = selector.replace("xs:","")
+            selectValue = self.select(selector)
+            for value in selectValue:
+                print(value.contents[1])
+                print("####")
+                schema = ""
+                #print(schema)
+        return schema
+        
+    def select_xsd(self, selector):
+        # Perform a xsd operation on the current element
+        selector = selector.replace("xsd:","")
+        selector = selector.replace("xs:","")
+        return self.select(selector)
+    
+    def select_one_xsd(self, selector):
+        # Perform a xsd operation on the current element
+        selector = selector.replace("xsd:","")
+        selector = selector.replace("xs:","")
+        return self.select_one(selector)
+    
     def select(self, selector, _candidate_generator=None, limit=None):
         """Perform a CSS selection operation on the current element."""
 

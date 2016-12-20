@@ -174,6 +174,8 @@ class BeautifulSoup(Tag):
                 
                 if builder.is_xml:
                     markup_type = "XML"
+                elif builder.is_xsd:
+                    markup.type = "XSD"
                 else:
                     markup_type = "HTML"
                 
@@ -190,7 +192,9 @@ class BeautifulSoup(Tag):
 
         self.builder = builder
         self.is_xml = builder.is_xml
+        self.is_xsd = builder.is_xsd
         self.known_xml = self.is_xml
+        self.known_xsd = self.is_xsd
         self.builder.soup = self
 
         self.parse_only = parse_only
