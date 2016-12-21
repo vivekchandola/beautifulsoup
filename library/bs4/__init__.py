@@ -175,7 +175,7 @@ class BeautifulSoup(Tag):
                 if builder.is_xml:
                     markup_type = "XML"
                 elif builder.is_xsd:
-                    markup.type = "XSD"
+                    markup_type = "XSD"
                 else:
                     markup_type = "HTML"
                 

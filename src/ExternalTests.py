@@ -1,0 +1,155 @@
+import unittest
+# add the local repo to python path with top priority, otherwise python might
+# use bs4 as it is installed on the system.
+import sys
+sys.path.insert(0, '../library/')
+from bs4 import BeautifulSoup
+
+
+class ExternalBehaviour(unittest.TestCase):
+
+    def setUp(self):
+        self.attributes_b = '<b class="boldest">Extremely bold</b>'
+        self.attributes_bq = '<blockquote class="boldest">' \
+                             'Extremely bold</blockquote>'
+        self.navigatable = '<table id="1"><tr><td>Another table:' \
+                           '<table id="2"><tr><td>foo</td></tr>' \
+                           '</table></td>'
+
+        self.html5_nav = '<body><table id="1"><tbody><tr><td>Another table:' \
+                         '<table id="2"><tbody><tr><td>foo</td></tr></tbody>' \
+                         '</table></td></tr></tbody></table></body>'
+
+        self.td = '<td>Another table:<table id="2"><tr><td>foo' \
+                  '</td></tr></table></td>'
+        self.td_html5 = '<td>Another table:<table id="2"><tbody><tr><td>foo' \
+                        '</td></tr></tbody></table></td>'
+
+        self.table_contents = '[<tr><td>Another table:<table id="2"><tr><td>' \
+                              'foo</td></tr></table></td></tr>]'
+
+        self.table_contents_html5 = '[<tbody><tr><td>Another table:' \
+                                    '<table id="2"><tbody><tr><td>foo</td>' \
+                                    '</tr></tbody></table></td></tr></tbody>]'
+
+        self.broken_code = '<a><b /></a>'
+        self.broken_code2 = '<a></p>'
+
+    def test_empty_markup(self):
+        '''
+        BS4 may add extra information if the XML input is considered invalid
+        for the specified parser. These test for those auto-completions.
+        '''
+        soup_html_parser = BeautifulSoup('', 'html.parser')
+        soup_lxml_xml = BeautifulSoup('', 'lxml-xml')
+        soup_html5lib = BeautifulSoup('', 'html5lib')
+        self.assertEqual(str(soup_html_parser), '')
+        self.assertEqual(str(soup_lxml_xml),
+                         '<?xml version="1.0" encoding="utf-8"?>\n')
+        self.assertEqual(str(soup_html5lib),
+                         '<html><head></head><body></body></html>')
+
+    def test_object_types(self):
+        '''
+        These tests test various basic operations on different object types,
+        such as retrieving and modifying tag names and attribute values.
+        '''
+        soup_html_parser = BeautifulSoup(self.attributes_b, 'html.parser')
+        soup_lxml_xml = BeautifulSoup(self.attributes_b, 'lxml-xml')
+        soup_html5lib = BeautifulSoup(self.attributes_b, 'html5lib')
+
+        tag_html_parser = soup_html_parser.b
+        tag_lxml_xml = soup_lxml_xml.b
+        tag_html5lib = soup_html5lib.b
+
+        self.assertEqual(tag_html_parser.name, u'b')
+        self.assertEqual(tag_lxml_xml.name, u'b')
+        self.assertEqual(tag_html5lib.name, u'b')
+
+        tag_html_parser.name = 'blockquote'
+        tag_lxml_xml.name = 'blockquote'
+        tag_html5lib.name = 'blockquote'
+
+        self.assertEqual(str(tag_html_parser), self.attributes_bq)
+        self.assertEqual(str(tag_lxml_xml), self.attributes_bq)
+        self.assertEqual(str(tag_html5lib), self.attributes_bq)
+
+        self.assertEqual(tag_html_parser['class'], [u'boldest'])
+        self.assertEqual(tag_lxml_xml['class'], u'boldest')
+        self.assertEqual(tag_html5lib['class'], [u'boldest'])
+
+        tag_html_parser['class'] = 'red'
+        tag_lxml_xml['class'] = 'red'
+        tag_html5lib['class'] = 'red'
+
+        self.assertEqual(tag_html_parser['class'], u'red')
+        self.assertEqual(tag_lxml_xml['class'], u'red')
+        self.assertEqual(tag_html5lib['class'], u'red')
+
+    def test_navigation(self):
+        '''
+        Tests for basic navigation operations, like finding named tags,
+        content extraction, and extraction of parent tags.
+        '''
+        soup_html_parser = BeautifulSoup(self.navigatable, 'html.parser')
+        soup_lxml_xml = BeautifulSoup(self.navigatable, 'lxml-xml')
+        soup_html5lib = BeautifulSoup(self.navigatable, 'html5lib')
+
+        self.assertEqual(str(soup_html5lib.body), self.html5_nav)
+
+        self.assertEqual(str(soup_html_parser.td), self.td)
+        self.assertEqual(str(soup_lxml_xml.td), self.td)
+        self.assertEqual(str(soup_html5lib.td), self.td_html5)
+
+        self.assertEqual(str(soup_html_parser.table.contents),
+                         self.table_contents)
+        self.assertEqual(str(soup_lxml_xml.table.contents),
+                         self.table_contents)
+        self.assertEqual(str(soup_html5lib.table.contents),
+                         self.table_contents_html5)
+
+        self.assertEqual(str(soup_html_parser.td.parent.name), 'tr')
+        self.assertEqual(str(soup_lxml_xml.td.parent.name), 'tr')
+        self.assertEqual(str(soup_html5lib.td.parent.name), 'tr')
+
+        parents_html_parser = str([str(tag.name) for tag in
+                                   soup_html_parser.td.parents])
+        parents_lxml = str([str(tag.name) for tag in
+                            soup_html_parser.td.parents])
+        parents_xml = str([str(tag.name) for tag in soup_lxml_xml.td.parents])
+        parents_html5 = str([str(tag.name) for tag in
+                             soup_html5lib.td.parents])
+
+        self.assertEqual(parents_html_parser, "['tr', 'table', '[document]']")
+        self.assertEqual(parents_lxml, "['tr', 'table', '[document]']")
+        self.assertEqual(parents_xml, "['tr', 'table', '[document]']")
+        self.assertEqual(parents_html5,
+                         "['tr', 'tbody', 'table', 'body', 'html', '[document]']")
+
+    def test_parser_diffs(self):
+        '''
+        Test for differences in fixing of broken tags.
+        '''
+        soup_html_parser = BeautifulSoup(self.broken_code, 'html.parser')
+        soup_lxml_xml = BeautifulSoup(self.broken_code, 'lxml-xml')
+        soup_html5lib = BeautifulSoup(self.broken_code, 'html5lib')
+
+        self.assertEqual(str(soup_html_parser), '<a><b></b></a>')
+        self.assertEqual(str(soup_lxml_xml),
+                         '<?xml version="1.0" encoding="utf-8"?>\n<a><b/></a>')
+        self.assertEqual(str(soup_html5lib),
+                         '<html><head></head><body><a><b></b></a></body></html>')
+
+        soup_html_parser = BeautifulSoup(self.broken_code2, 'html.parser')
+        soup_lxml_xml = BeautifulSoup(self.broken_code2, 'lxml-xml')
+        soup_html5lib = BeautifulSoup(self.broken_code2, 'html5lib')
+
+        self.assertEqual(str(soup_html_parser), '<a></a>')
+        self.assertEqual(str(soup_lxml_xml),
+                         '<?xml version="1.0" encoding="utf-8"?>\n<a/>')
+        self.assertEqual(str(soup_html5lib),
+                         '<html><head></head><body><a><p></p></a></body></html>')
+
+
+if __name__ == "__main__":
+    unittest.main()

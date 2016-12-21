@@ -40,7 +40,7 @@ class LXMLTreeBuilderForXSD(TreeBuilder):
     CHUNK_SIZE = 512
 
     # This namespace mapping is specified in the XSD Namespace
-    DEFAULT_NSMAPS = {'http://www.w3.org/2001/XMLSchema' : "xs"}
+    DEFAULT_NSMAPS = {'http://www.w3.org/2001/XMLSchema': "xsd"}
     
     is_xml = True
 
@@ -138,7 +138,7 @@ class LXMLTreeBuilderForXSD(TreeBuilder):
             attrs = attrs.copy()
             for prefix, namespace in nsmap.items():
                 attribute = NamespacedAttribute(
-                    "xs", prefix, "http://www.w3.org/2001/XMLSchema")
+                    "xsd", prefix, "http://www.w3.org/2001/XMLSchema")
                 attrs[attribute] = namespace
 
         # Namespaces are in play. Find any attributes that came in
@@ -213,6 +213,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXSD):
     features = ALTERNATE_NAMES + [NAME, HTML, FAST, PERMISSIVE]
     processing_instruction_class = ProcessingInstruction
     is_xsd = False
+    is_xml = False
 
     def default_parser(self, encoding):
         return etree.HTMLParser

@@ -1326,7 +1326,7 @@ class Tag(PageElement):
     findAll = find_all       # BS3
     findChildren = find_all  # BS2
 
-    #Generator methods
+    # Generator methods
     @property
     def children(self):
         # return iter() to make the purpose of the method clear
@@ -1347,32 +1347,38 @@ class Tag(PageElement):
     _selector_combinators = ['>', '+', '~']
     _select_debug = False
     quoted_colon = re.compile('"[^"]*:[^"]*"')
+
     def select_one(self, selector):
         """Perform a CSS selection operation on the current element."""
         value = self.select(selector, limit=1)
         if value:
             return value[0]
         return None
-    
+
+    # XSD code
+
     def create_schema(self, schema_data):
-        def getXSVal(element): #removes namespace
+        def getXSVal(element):
+            # removes namespace
             return element.tag.split('}')[-1]
-        
+
         def get_simple_type(element):
             return {
                 "name": element.get("name"),
                 "restriction": element.getchildren()[0].attrib,
-                "elements": [ e.get("value") for e in element.getchildren()[0].getchildren() ]
-        }
+                "elements": [e.get("value") for e in
+                             element.getchildren()[0].getchildren()]
+            }
 
         def get_simple_content(element):
             return {
                 "simpleContent": {
                     "extension": element.getchildren()[0].attrib,
-                    "attributes": [ a.attrib for a in element.getchildren()[0].getchildren() ]
+                    "attributes": [a.attrib for a in
+                                   element.getchildren()[0].getchildren()]
                 }
             }
-        
+
         def get_elements(element):
             if len(element.getchildren()) == 0:
                 return element.attrib
@@ -1395,12 +1401,12 @@ class Tag(PageElement):
             else:
                 if tag == "simpleType":
                     return get_simple_type(element)
-                else: 
+                else:
                     data.update(element.attrib)
 
             data["elements"] = []
             data["attributes"] = []
-            children = element.getchildren()        
+            children = element.getchildren()
 
             for child in children:
                 if child.get("name") is not None:
@@ -1422,31 +1428,31 @@ class Tag(PageElement):
         children = root.getchildren()
         for child in children:
             c_type = getXSVal(child)
-            if child.get("name") is not None and not c_type in schema:
+            if child.get("name") is not None and c_type not in schema:
                 schema[c_type] = []
             schema[c_type].append(get_elements(child))
         return schema
-    
+
     def parse_xsd(self, etreeobject=None, doc=None):
         # Perform a xsd operation on the current element
         if etreeobject is None:
-            raise ValueError("Pass a etree object in the method argument")
-        if doc is not None:
-            schema = self.create_schema(etreeobject.parse(doc))
-        return schema
-        
+            raise ValueError("Pass an etree object in the method argument")
+        elif doc is None:
+            raise ValueError("Pass a document in the method argument")
+        return self.create_schema(etreeobject.parse(doc))
+
     def select_xsd(self, selector):
         # Perform a xsd operation on the current element
-        selector = selector.replace("xsd:","")
-        selector = selector.replace("xs:","")
+        selector = selector.replace("xsd:", "")
+        selector = selector.replace("xs:", "")
         return self.select(selector)
-    
+
     def select_one_xsd(self, selector):
         # Perform a xsd operation on the current element
-        selector = selector.replace("xsd:","")
-        selector = selector.replace("xs:","")
+        selector = selector.replace("xsd:", "")
+        selector = selector.replace("xs:", "")
         return self.select_one(selector)
-    
+
     def select(self, selector, _candidate_generator=None, limit=None):
         """Perform a CSS selection operation on the current element."""
 
@@ -1456,7 +1462,8 @@ class Tag(PageElement):
             for partial_selector in selector.split(','):
                 partial_selector = partial_selector.strip()
                 if partial_selector == '':
-                    raise ValueError('Invalid group selection syntax: %s' % selector)
+                    raise ValueError('Invalid group selection syntax: %s'
+                                     % selector)
                 candidates = self.select(partial_selector, limit=limit)
                 for candidate in candidates:
                     if candidate not in context:
@@ -1505,16 +1512,20 @@ class Tag(PageElement):
             elif '#' in token:
                 # ID selector
                 tag_name, tag_id = token.split('#', 1)
+
                 def id_matches(tag):
                     return tag.get('id', None) == tag_id
+
                 checker = id_matches
 
             elif '.' in token:
                 # Class selector
                 tag_name, klass = token.split('.', 1)
                 classes = set(klass.split('.'))
+
                 def classes_match(candidate):
                     return classes.issubset(candidate.get('class', []))
+
                 checker = classes_match
 
             elif ':' in token and not self.quoted_colon.search(token):
@@ -1523,7 +1534,8 @@ class Tag(PageElement):
                 if tag_name == '':
                     raise ValueError(
                         "A pseudo-class must be prefixed with a tag name.")
-                pseudo_attributes = re.match('([a-zA-Z\d-]+)\(([a-zA-Z\d]+)\)', pseudo)
+                pseudo_attributes = re.match('([a-zA-Z\d-]+)\(([a-zA-Z\d]+)\)',
+                                             pseudo)
                 found = []
                 if pseudo_attributes is None:
                     pseudo_type = pseudo
@@ -1534,11 +1546,14 @@ class Tag(PageElement):
                     try:
                         pseudo_value = int(pseudo_value)
                     except:
-                        raise NotImplementedError(
-                            'Only numeric values are currently supported for the nth-of-type pseudo-class.')
+                        errval = 'Only numeric values are currently ' \
+                                 'supported for the nth-of-type pseudo-class.'
+                        raise NotImplementedError(errval)
                     if pseudo_value < 1:
-                        raise ValueError(
-                            'nth-of-type pseudo-class value must be at least 1.')
+                        errval = 'nth-of-type pseudo-class value' \
+                                 ' must be at least 1.'
+                        raise ValueError(errval)
+
                     class Counter(object):
                         def __init__(self, destination):
                             self.count = 0
@@ -1550,10 +1565,12 @@ class Tag(PageElement):
                                 return True
                             else:
                                 return False
+
                     checker = Counter(pseudo_value).nth_child_of_type
                 else:
-                    raise NotImplementedError(
-                        'Only the following pseudo-classes are implemented: nth-of-type.')
+                    errval = 'Only the following pseudo-classes ' \
+                             'are implemented: nth-of-type.'
+                    raise NotImplementedError(errval)
 
             elif token == '*':
                 # Star selector -- matches everything
@@ -1591,6 +1608,7 @@ class Tag(PageElement):
                 # one that yields a tag's direct children (">"), and
                 # the selector is "foo".
                 next_token = tokens[index+1]
+
                 def recursive_select(tag):
                     if self._select_debug:
                         print '    Calling select("%s") recursively on %s %s' % (next_token, tag.name, tag.attrs)
